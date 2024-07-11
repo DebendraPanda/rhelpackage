@@ -88,13 +88,13 @@ public class redhatpackages {
 
         List<WebElement> allOptions = dropdown.getOptions();
         List<String> dropdownValues = new ArrayList<>();
-        int c = 0;
+        //int c = 0;
         for (WebElement option : allOptions) {
-            if (c == 8) {
-                break;
-            }
+         //   if (c == 8) {
+         //       break;
+         //   }
             dropdownValues.add(option.getText());
-            c = c + 1;
+        //    c = c + 1;
         }
         Workbook existingWorkbook = null;
         Sheet existingSheet = null;
