@@ -154,13 +154,8 @@ public class redhatpackages {
 
             List<WebElement> allOptions = dropdown.getOptions();
             List<String> dropdownValues = new ArrayList<>();
-           int c = 0;
             for (WebElement option : allOptions) {
-                if (c == 2) {
-                    break;
-                }
                 dropdownValues.add(option.getText());
-                c = c + 1;
             }
 
             for (String value : dropdownValues) {
