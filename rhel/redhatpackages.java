@@ -155,14 +155,24 @@ public class redhatpackages {
 	                    System.out.println("Base Directory created successfully: " + baseDownloadDir.getAbsolutePath());
 	                } else {
 	                    System.out.println("Failed to create base directory: " + baseDownloadDir.getAbsolutePath());
-	                    return;
+	                    continue; // Skip this URL if directory creation fails
 	                }
 	            }
 
 	            driver.navigate().to(packageUrl);
 	            Thread.sleep(4000);
-	            WebElement versions = driver.findElement(By.xpath("//select[@id='evr' and @class='select-chosen linked']"));
 
+	            String pageSource = driver.getPageSource();
+	            if (pageSource.contains("We'll be back soon.") || pageSource.contains("Active Subscription Required")) {
+	                String errorUrl = driver.getCurrentUrl();
+	                errorUrls.add(errorUrl);
+	                System.out.println("Found message for URL: " + errorUrl);
+	                driver.navigate().back();
+	                continue; // Move to the next package URL
+	            }
+
+	            // Proceed with locating the dropdown and processing versions
+	            WebElement versions = driver.findElement(By.xpath("//select[@id='evr' and @class='select-chosen linked']"));
 	            ((RemoteWebDriver) driver).executeScript("arguments[0].style.display='block';", versions);
 	            Select dropdown = new Select(versions);
 
@@ -173,18 +183,19 @@ public class redhatpackages {
 	            }
 
 	            for (String value : dropdownValues) {
-	            	Thread.sleep(4000);
+	                Thread.sleep(4000);
 	                versions = driver.findElement(By.xpath("//select[@id='evr' and @class='select-chosen linked']")); // Re-locate the dropdown element
 	                ((RemoteWebDriver) driver).executeScript("arguments[0].style.display='block';", versions);
 	                dropdown = new Select(versions);
 	                dropdown.selectByVisibleText(value);
 	                Thread.sleep(6000);
-
-	                // Check for "We'll be back soon." message
-	                if (driver.getPageSource().contains("We'll be back soon.")) {
+	                
+	             // Check for "We'll be back soon." message or "Active Subscription Required" message again after selecting a version
+	                pageSource = driver.getPageSource();
+	                if (pageSource.contains("We'll be back soon.") || pageSource.contains("Active Subscription Required")) {
 	                    String errorUrl = driver.getCurrentUrl();
 	                    errorUrls.add(errorUrl);
-	                    System.out.println("Found 'We'll be back soon.' message for URL: " + errorUrl);
+	                    System.out.println("Found message for URL: " + errorUrl);           
 	                    driver.navigate().back();
 	                    continue; // Move to the next version
 	                }
@@ -250,7 +261,6 @@ public class redhatpackages {
 	                }
 	            }
 	        }
-
 
 	        // Add URLs with "We'll be back soon." message to error sheet
 	        for (String errorUrl : errorUrls) {
